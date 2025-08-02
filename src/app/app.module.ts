@@ -3,10 +3,8 @@ import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-
 import { AuthenticationService } from './service/authentication.service';
 import { UserService } from './service/user.service';
 import { AuthInterceptor } from './interceptor/auth.interceptor';
@@ -32,7 +30,8 @@ import { UserComponent } from './user/user.component';
     AppRoutingModule,
     NotificationModule
   ],
-  providers: [NotificationService,
+  providers: [
+    NotificationService,
     AuthenticationService,
     UserService,
     AuthGuard,
