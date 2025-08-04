@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> ade89ae9f7018bacc1d4125b69fa3224a5a44422
 export class User {
   public id: number = 0;
   public userId: string = '';
@@ -11,6 +15,7 @@ export class User {
   public active: boolean = false;
   public notLocked: boolean = false;
   public role: string = '';
+<<<<<<< HEAD
   public authorities: [] = [];
   
     constructor (){
@@ -23,3 +28,11 @@ export class User {
         this.authorities = [];
     }
 }
+=======
+  public authorities: string[] = [];
+
+  constructor(init?: Partial<User>) {
+    Object.assign(this, init);
+  }
+}
+>>>>>>> ade89ae9f7018bacc1d4125b69fa3224a5a44422

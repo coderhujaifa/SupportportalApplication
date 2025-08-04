@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Supportportalapp
+=======
+# SupportportalApplication
+>>>>>>> ade89ae9f7018bacc1d4125b69fa3224a5a44422
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 14.2.13.
 
