@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> ade89ae9f7018bacc1d4125b69fa3224a5a44422
 export class User {
   public id: number = 0;
   public userId: string = '';
@@ -15,24 +11,16 @@ export class User {
   public active: boolean = false;
   public notLocked: boolean = false;
   public role: string = '';
-<<<<<<< HEAD
   public authorities: [] = [];
-  
-    constructor (){
-        this.firstName = '';
-        this.lastName = '';
-        this.email = '';
-        this.active = false;
-        this.notLocked = false;
-        this.role = '';
-        this.authorities = [];
-    }
-}
-=======
-  public authorities: string[] = [];
+  username: any;
 
-  constructor(init?: Partial<User>) {
-    Object.assign(this, init);
+  constructor() {
+    this.firstName = '';
+    this.lastName = '';
+    this.email = '';
+    this.active = false;
+    this.notLocked = false;
+    this.role = '';
+    this.authorities = [];
   }
 }
->>>>>>> ade89ae9f7018bacc1d4125b69fa3224a5a44422

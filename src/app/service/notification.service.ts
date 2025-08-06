@@ -10,8 +10,4 @@ export class NotificationService {
   public notify(type: NotificationType, message: string) {
     this.notifier.notify(type, message);
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> ade89ae9f7018bacc1d4125b69fa3224a5a44422

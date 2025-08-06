@@ -3,11 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-<<<<<<< HEAD
     "supportportalapp": {
-=======
-    "SupportportalApplication": {
->>>>>>> ade89ae9f7018bacc1d4125b69fa3224a5a44422
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -17,11 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-<<<<<<< HEAD
             "outputPath": "dist/supportportalapp",
-=======
-            "outputPath": "dist/supportportal-application",
->>>>>>> ade89ae9f7018bacc1d4125b69fa3224a5a44422
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -30,7 +22,6 @@
               "src/favicon.ico",
               "src/assets"
             ],
-<<<<<<< HEAD
             "styles": [
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "src/styles.css"
@@ -38,13 +29,6 @@
             "scripts": [
               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
             ]
-=======
-           "styles": [
-             "node_modules/font-awesome/css/font-awesome.css",
-              "src/styles.css"
-            ],
-            "scripts": []
->>>>>>> ade89ae9f7018bacc1d4125b69fa3224a5a44422
           },
           "configurations": {
             "production": {
@@ -83,17 +67,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-<<<<<<< HEAD
               "browserTarget": "supportportalapp:build:production"
             },
             "development": {
               "browserTarget": "supportportalapp:build:development"
-=======
-              "browserTarget": "SupportportalApplication:build:production"
-            },
-            "development": {
-              "browserTarget": "SupportportalApplication:build:development"
->>>>>>> ade89ae9f7018bacc1d4125b69fa3224a5a44422
             }
           },
           "defaultConfiguration": "development"
@@ -101,11 +78,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-<<<<<<< HEAD
             "browserTarget": "supportportalapp:build"
-=======
-            "browserTarget": "SupportportalApplication:build"
->>>>>>> ade89ae9f7018bacc1d4125b69fa3224a5a44422
           }
         },
         "test": {
@@ -120,27 +93,18 @@
               "src/assets"
             ],
             "styles": [
-<<<<<<< HEAD
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "src/styles.css"
             ],
             "scripts": [
               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
             ]
-=======
-              "src/styles.css"
-            ],
-            "scripts": []
->>>>>>> ade89ae9f7018bacc1d4125b69fa3224a5a44422
           }
         }
       }
     }
-<<<<<<< HEAD
   },
   "cli": {
     "analytics": "13a5799b-1781-400f-8584-87105757f697"
-=======
->>>>>>> ade89ae9f7018bacc1d4125b69fa3224a5a44422
   }
 }

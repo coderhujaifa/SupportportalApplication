@@ -22,11 +22,13 @@ export class ComponentUserComponent implements OnInit {
   public fileName: string | undefined;
   public profileImage: File | undefined;
   private subscriptions: Subscription[] = [];
+  public editUser = new User();
+  private currentUsername: any;
 
   constructor(
     private userService: UserService,
     private notificationService: NotificationService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.getUsers(true);
@@ -58,9 +60,9 @@ export class ComponentUserComponent implements OnInit {
 
   public onSelectUser(selectedUser: User): void {
     this.selectedUser = selectedUser;
-    this.clickButton('new-user-close');
-    document.getElementById('openUserInfo')?.click();
+    this.clickButton('openUserInfo');  // Sahi button call
   }
+
 
   public onProfileImageChange(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -81,7 +83,7 @@ export class ComponentUserComponent implements OnInit {
       return;
     }
 
-    const formData = this.userService.createUserFormDate('', userForm.value, this.profileImage);
+    const formData = this.userService.createUserFormData('', userForm.value, this.profileImage);
 
     this.subscriptions.push(
       this.userService.addUser(formData).subscribe(
@@ -92,14 +94,55 @@ export class ComponentUserComponent implements OnInit {
           this.profileImage = undefined;
 
           userForm.reset();
+          this.sendNotification(NotificationType.SUCCESS, '${response.firstName} ${response.lastName} added successfully');
+        },
+        (error: HttpErrorResponse) => {
+          this.sendNotification(NotificationType.ERROR, error.error.message);
+          this.profileImage = undefined;
+        }
+      )
+    );
+  }
+
+  public searchUsers(searchTerm: string): void {
+    const results: User[] = [];
+    for (const user of this.userService.getUsersFormLocalCache()) {
+      if (user.firstName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||
+        user.lastName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||
+        user.userName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||
+        user.userId.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1) {
+        results.push(user);
+      }
+    }
+    this.users = results;
+    if (results.length == 0 || !searchTerm) {
+      this.users = this.userService.getUsersFormLocalCache();
+    }
+  }
+
+  public onUpdateUser(): void {
+    const formData = this.userService.createUserFormData(this.currentUsername, this.editUser, this.profileImage!);
+    this.subscriptions.push(
+      this.userService.updateUser(formData).subscribe(
+        (response) => {
+          this.clickButton('closeEditUserModalButton');
+          this.getUsers(false);
+          this.fileName = undefined;
+          this.profileImage = undefined;
           this.sendNotification(NotificationType.SUCCESS, '${response.firstName} ${response.lastName} updated successfully');
         },
         (error: HttpErrorResponse) => {
           this.sendNotification(NotificationType.ERROR, error.error.message);
-                    this.profileImage = undefined;
+          this.profileImage = undefined;
         }
       )
     );
+  }
+
+  public onEditUser(editUser: User): void {
+    this.editUser = editUser;
+    this.currentUsername = editUser.username;
+    this.clickButton('openUserEdit');
   }
 
   private sendNotification(notificationType: NotificationType, message: string): void {
@@ -110,9 +153,24 @@ export class ComponentUserComponent implements OnInit {
     }
   }
 
+  public getFormattedRole(role: string): string {
+    switch (role) {
+      case 'ROLE_ADMIN':
+        return 'Admin';
+      case 'ROLE_MANAGER':
+        return 'Manager';
+      case 'ROLE_USER':
+        return 'User';
+      default:
+        return role;
+    }
+  }
+
+
   // ✅ Add this function to fix the error
   public clickButton(buttonId: string): void {
     document.getElementById(buttonId)?.click();
   }
+
 
 }

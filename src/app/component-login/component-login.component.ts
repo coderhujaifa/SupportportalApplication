@@ -20,39 +20,40 @@ export class ComponentLoginComponent implements OnInit, OnDestroy {
     private NotificationService: NotificationService) { }
 
   ngOnInit(): void {
-  if (this.authenticationService.isLoggedIn()) {
-    this.router.navigateByUrl('/user/management');
+    if (this.authenticationService.isLoggedIn()) {
+      this.router.navigateByUrl('/user/management');
+    } else {
+      this.router.navigateByUrl('login');
+    }
   }
-}
-
 
   public onLogin(user: User): void {
     this.showLoading = true;
     this.subscriptions.push(
       this.authenticationService.login(user).subscribe({
-  next: (response: HttpResponse<User>) => {
-    const token = response.headers.get('HeaderType.JWT_TOKEN');
-    if (token) {
-      this.authenticationService.saveToken(token);
-    }
+        next: (response: HttpResponse<User>) => {
+          const token = response.headers.get('HeaderType.JWT_TOKEN');
+          if (token) {
+            this.authenticationService.saveToken(token);
+          }
 
-    const user = response.body;
-    if (user) {
-      this.authenticationService.addUserToLocalCache(user);
-    }
+          const user = response.body;
+          if (user) {
+            this.authenticationService.addUserToLocalCache(user);
+          }
 
-    this.router.navigateByUrl('/user/management');
-    this.showLoading = false;
-  },
-  error: (errorResponse: HttpErrorResponse) => {
-    this.sendErrorNotification(NotificationType.ERROR, errorResponse.error.message);
-    this.showLoading = false;
-  
-    }
-  }    ));
-}
+          this.router.navigateByUrl('/user/management');
+          this.showLoading = false;
+        },
+        error: (errorResponse: HttpErrorResponse) => {
+          this.sendErrorNotification(NotificationType.ERROR, errorResponse.error.message);
+          this.showLoading = false;
 
- private  sendErrorNotification(NotificationType: NotificationType, message: string): void {
+        }
+      }));
+  }
+
+  private sendErrorNotification(NotificationType: NotificationType, message: string): void {
     if (message) {
       this.NotificationService.notify(NotificationType, message);
     } else {

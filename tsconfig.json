@@ -1,4 +1,3 @@
-/* To learn more about this file see: https://angular.io/config/tsconfig. */
 {
   "compileOnSave": false,
   "compilerOptions": {
@@ -28,7 +27,6 @@
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true
-<<<<<<< HEAD
   },
 
   "exclude": [
@@ -36,7 +34,4 @@
   ]
 
 
-=======
-  }
->>>>>>> ade89ae9f7018bacc1d4125b69fa3224a5a44422
 }
