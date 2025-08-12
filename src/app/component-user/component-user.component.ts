@@ -6,6 +6,8 @@ import { NotificationService } from '../service/notification.service';
 import { NotificationType } from '../enum/notification-type.enum';
 import { HttpErrorResponse } from '@angular/common/http';
 import { NgForm } from '@angular/forms';
+import { CustomHttpResponse } from '../model/custom-http-response';
+
 
 @Component({
   selector: 'app-user',
@@ -138,10 +140,42 @@ export class ComponentUserComponent implements OnInit {
       )
     );
   }
+public onResetPassword(emailForm: NgForm): void {
+  const emailAddress = emailForm.value['reset-password-email']; // key match with HTML name
+  this.refreshing = true;
 
+  this.subscriptions.push(
+    this.userService.resetPassword(emailAddress).subscribe(
+      (response: CustomHttpResponse) => {
+        this.sendNotification(NotificationType.SUCCESS, response.message);
+        this.refreshing = false;
+        emailForm.reset();
+      },
+      (error: HttpErrorResponse) => {
+        this.sendNotification(NotificationType.WARNING, error.error.message);
+        this.refreshing = false;
+      }
+    )
+  );
+}
+
+
+ public onDeleteUser(userId: number): void {
+  this.subscriptions.push(
+    this.userService.deleteUser(userId).subscribe(
+      (response: CustomHttpResponse) => {
+        this.sendNotification(NotificationType.SUCCESS, response.message);
+        this.getUsers(false);
+      },
+      (error: HttpErrorResponse) => {
+        this.sendNotification(NotificationType.ERROR, error.error.message);
+      }
+    )
+  );
+}
   public onEditUser(editUser: User): void {
     this.editUser = editUser;
-    this.currentUsername = editUser.username;
+    this.currentUsername = editUser.userName;
     this.clickButton('openUserEdit');
   }
 

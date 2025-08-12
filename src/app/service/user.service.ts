@@ -6,6 +6,7 @@ import { User } from '../model/user';
 import { CustomHttpResponse } from '../model/custom-http-response';
 import { map } from 'rxjs/operators';
 
+
 @Injectable({
   providedIn: 'root'
 })
@@ -36,9 +37,11 @@ export class UserService {
     return this.http.post<User>(`${this.host}/user/update`, formData);
   }
 
-  public resetPassword(email: string): Observable<CustomHttpResponse | HttpErrorResponse> {
-    return this.http.get<CustomHttpResponse>(`${this.host}/user/resetPassword/${email}`);
-  }
+  public resetPassword(email: string): Observable<CustomHttpResponse> {
+  return this.http.get<CustomHttpResponse>(`${this.host}/user/resetPassword/${email}`);
+}
+
+
 
   public updateProfileImage(formData: FormData): Observable<HttpEvent<User> | HttpErrorResponse> {
     return this.http.post<User>(`${this.host}/user/updateProfileImage`, formData, {
@@ -47,9 +50,10 @@ export class UserService {
     });
   }
 
-  public deleteUser(userId: Number): Observable<CustomHttpResponse | HttpErrorResponse> {
-    return this.http.delete<CustomHttpResponse>(`${this.host}/user/delete/${userId}`);
-  }
+  public deleteUser(userId: number): Observable<CustomHttpResponse> {
+  return this.http.delete<CustomHttpResponse>(`${this.host}/user/delete/${userId}`);
+}
+
 
   public addUsersToLocalCache(users: User[]): void {
     localStorage.setItem('users', JSON.stringify(users));
@@ -66,7 +70,7 @@ export class UserService {
     formData.append('currentUsername', loggedInUsername);
     formData.append('firstName', user.firstName);
     formData.append('lastName', user.lastName);
-    formData.append('userName', user.userName);  // backend expects 'username'
+    formData.append('userName', user.userName);  
     formData.append('email', user.email);
     formData.append('role', user.role);
     formData.append('profileImage', profileImage);
