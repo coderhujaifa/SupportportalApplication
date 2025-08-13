@@ -19,6 +19,7 @@ export class ComponentUserComponent implements OnInit {
   private titleSubject = new BehaviorSubject<string>('Users');
   public titleAction$ = this.titleSubject.asObservable();
   public users: User[] = [];
+  
   public refreshing: boolean = false;
   public selectedUser: User = new User();
   public fileName: string | undefined;
@@ -26,6 +27,7 @@ export class ComponentUserComponent implements OnInit {
   private subscriptions: Subscription[] = [];
   public editUser = new User();
   private currentUsername: any;
+  
 
   constructor(
     private userService: UserService,
@@ -59,6 +61,39 @@ export class ComponentUserComponent implements OnInit {
       })
     );
   }
+
+  public onResetPassword(emailForm: NgForm): void {
+  const emailAddress = emailForm.value['reset-password-email'];
+  this.refreshing = true;
+
+  this.subscriptions.push(
+    this.userService.resetPassword(emailAddress).subscribe(
+      (response: CustomHttpResponse) => {
+        this.sendNotification(NotificationType.SUCCESS, response.message);
+        this.refreshing = false;
+        emailForm.reset();
+      },
+      (error: HttpErrorResponse) => {
+        this.sendNotification(NotificationType.WARNING, error.error.message);
+        this.refreshing = false;
+      }
+    )
+  );
+}
+
+public onDeleteUser(userId: number): void {
+  this.subscriptions.push(
+    this.userService.deleteUser(userId).subscribe(
+      (response: CustomHttpResponse) => {
+        this.sendNotification(NotificationType.SUCCESS, response.message);
+        this.getUsers(false);
+      },
+      (error: HttpErrorResponse) => {
+        this.sendNotification(NotificationType.ERROR, error.error.message);
+      }
+    )
+  );
+}
 
   public onSelectUser(selectedUser: User): void {
     this.selectedUser = selectedUser;
@@ -122,6 +157,7 @@ export class ComponentUserComponent implements OnInit {
     }
   }
 
+  
   public onUpdateUser(): void {
     const formData = this.userService.createUserFormData(this.currentUsername, this.editUser, this.profileImage!);
     this.subscriptions.push(
@@ -140,39 +176,7 @@ export class ComponentUserComponent implements OnInit {
       )
     );
   }
-public onResetPassword(emailForm: NgForm): void {
-  const emailAddress = emailForm.value['reset-password-email']; // key match with HTML name
-  this.refreshing = true;
 
-  this.subscriptions.push(
-    this.userService.resetPassword(emailAddress).subscribe(
-      (response: CustomHttpResponse) => {
-        this.sendNotification(NotificationType.SUCCESS, response.message);
-        this.refreshing = false;
-        emailForm.reset();
-      },
-      (error: HttpErrorResponse) => {
-        this.sendNotification(NotificationType.WARNING, error.error.message);
-        this.refreshing = false;
-      }
-    )
-  );
-}
-
-
- public onDeleteUser(userId: number): void {
-  this.subscriptions.push(
-    this.userService.deleteUser(userId).subscribe(
-      (response: CustomHttpResponse) => {
-        this.sendNotification(NotificationType.SUCCESS, response.message);
-        this.getUsers(false);
-      },
-      (error: HttpErrorResponse) => {
-        this.sendNotification(NotificationType.ERROR, error.error.message);
-      }
-    )
-  );
-}
   public onEditUser(editUser: User): void {
     this.editUser = editUser;
     this.currentUsername = editUser.userName;
@@ -205,6 +209,5 @@ public onResetPassword(emailForm: NgForm): void {
   public clickButton(buttonId: string): void {
     document.getElementById(buttonId)?.click();
   }
-
-
 }
+
