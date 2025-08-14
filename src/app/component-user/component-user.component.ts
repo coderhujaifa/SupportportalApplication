@@ -7,7 +7,7 @@ import { NotificationType } from '../enum/notification-type.enum';
 import { HttpErrorResponse } from '@angular/common/http';
 import { NgForm } from '@angular/forms';
 import { CustomHttpResponse } from '../model/custom-http-response';
-
+import { AuthenticationService } from '../service/authentication.service';
 
 @Component({
   selector: 'app-user',
@@ -15,11 +15,10 @@ import { CustomHttpResponse } from '../model/custom-http-response';
   styleUrls: ['./component-user.component.css']
 })
 export class ComponentUserComponent implements OnInit {
-
   private titleSubject = new BehaviorSubject<string>('Users');
   public titleAction$ = this.titleSubject.asObservable();
   public users: User[] = [];
-  
+  public user!: User;
   public refreshing: boolean = false;
   public selectedUser: User = new User();
   public fileName: string | undefined;
@@ -27,21 +26,21 @@ export class ComponentUserComponent implements OnInit {
   private subscriptions: Subscription[] = [];
   public editUser = new User();
   private currentUsername: any;
-  
-
   constructor(
-    private userService: UserService,
-    private notificationService: NotificationService
-  ) { }
+  private authenticationService: AuthenticationService,
+  private userService: UserService,
+  private notificationService: NotificationService
+) { }
 
-  ngOnInit(): void {
+  
+    ngOnInit(): void { 
+    this.user = this.authenticationService.getUserFromLocalCache()|| new User;
     this.getUsers(true);
   }
 
   public changeTitle(title: string): void {
     this.titleSubject.next(title);
   }
-
   public getUsers(showNotification: boolean): void {
     this.refreshing = true;
     this.subscriptions.push(
@@ -62,38 +61,79 @@ export class ComponentUserComponent implements OnInit {
     );
   }
 
-  public onResetPassword(emailForm: NgForm): void {
-  const emailAddress = emailForm.value['reset-password-email'];
+  public onLogOut(): void {
+  this.authenticationService.logOut();
+  // Optional: redirect to login
+  window.location.href = '/login';
+}
+
+public onUpdateCurrentUser(user: User): void {
   this.refreshing = true;
+  const currentUser = this.authenticationService.getUserFromLocalCache();
+  this.currentUsername = currentUser ? currentUser.userName : null;
 
-  this.subscriptions.push(
-    this.userService.resetPassword(emailAddress).subscribe(
-      (response: CustomHttpResponse) => {
-        this.sendNotification(NotificationType.SUCCESS, response.message);
-        this.refreshing = false;
-        emailForm.reset();
-      },
-      (error: HttpErrorResponse) => {
-        this.sendNotification(NotificationType.WARNING, error.error.message);
-        this.refreshing = false;
-      }
-    )
+  const formData = this.userService.createUserFormData(
+    this.currentUsername,
+    this.editUser,
+    this.profileImage!
   );
-}
 
-public onDeleteUser(userId: number): void {
   this.subscriptions.push(
-    this.userService.deleteUser(userId).subscribe(
-      (response: CustomHttpResponse) => {
-        this.sendNotification(NotificationType.SUCCESS, response.message);
+    this.userService.updateUser(formData).subscribe(
+      (response) => {  // Type hata diya
+        this.authenticationService.addUserToLocalCache(response as User);
         this.getUsers(false);
+        this.fileName = undefined;
+        this.profileImage = undefined;
+        this.sendNotification(
+          NotificationType.SUCCESS,
+          `${(response as User).firstName} ${(response as User).lastName} update successful`
+        );
       },
-      (error: HttpErrorResponse) => {
-        this.sendNotification(NotificationType.ERROR, error.error.message);
+      (errorResponse: HttpErrorResponse) => {
+        this.sendNotification(
+          NotificationType.ERROR,
+          errorResponse.error.message
+        );
+        this.refreshing = false;
+        this.profileImage = undefined;
       }
     )
   );
 }
+
+  public onResetPassword(emailForm: NgForm): void {
+    const emailAddress = emailForm.value['reset-password-email'];
+    this.refreshing = true;
+
+    this.subscriptions.push(
+      this.userService.resetPassword(emailAddress).subscribe(
+        (response: CustomHttpResponse) => {
+          this.sendNotification(NotificationType.SUCCESS, response.message);
+          this.refreshing = false;
+          emailForm.reset();
+        },
+        (error: HttpErrorResponse) => {
+          this.sendNotification(NotificationType.WARNING, error.error.message);
+          this.refreshing = false;
+        }
+      )
+    );
+  }
+
+  public onDeleteUser(userId: number): void {
+    this.subscriptions.push(
+      this.userService.deleteUser(userId).subscribe(
+        (response: CustomHttpResponse) => {
+          this.sendNotification(NotificationType.SUCCESS, response.message);
+          this.getUsers(false);
+        },
+        (error: HttpErrorResponse) => {
+          this.sendNotification(NotificationType.ERROR, error.error.message);
+        }
+      )
+    );
+  }
 
   public onSelectUser(selectedUser: User): void {
     this.selectedUser = selectedUser;
@@ -157,7 +197,7 @@ public onDeleteUser(userId: number): void {
     }
   }
 
-  
+
   public onUpdateUser(): void {
     const formData = this.userService.createUserFormData(this.currentUsername, this.editUser, this.profileImage!);
     this.subscriptions.push(
