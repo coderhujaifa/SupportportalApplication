@@ -3,7 +3,7 @@ export class User {
   public userId: string = '';
   public firstName: string = '';
   public lastName: string = '';
-  public userName: string = '';
+  public username: string = '';
   public email: string = '';
   public logInDateDisplay: Date = new Date();
   public joinDate: Date = new Date();
@@ -12,7 +12,6 @@ export class User {
   public notLocked: boolean = false;
   public role: string = '';
   public authorities: [] = [];
-  username: any;
 
   constructor() {
     this.firstName = '';

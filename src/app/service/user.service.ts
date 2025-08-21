@@ -23,7 +23,7 @@ export class UserService {
       map(users => users.map(user => {
         return {
           ...user,
-          userName: (user as any).username  // map backend 'username' to model 'userName'
+          username: (user as any).username  // map backend 'username' to model 'userName'
         } as User;
       }))
     );
@@ -33,9 +33,10 @@ export class UserService {
     return this.http.post<User>(`${this.host}/user/add`, formData);
   }
 
-  public updateUser(formData: FormData): Observable<User | HttpErrorResponse> {
-    return this.http.post<User>(`${this.host}/user/update`, formData);
-  }
+  
+public updateUser(formData: FormData): Observable<User> {
+  return this.http.post<User>(`${this.host}/user/update`, formData);
+}
 
   public resetPassword(email: string): Observable<CustomHttpResponse> {
   return this.http.get<CustomHttpResponse>(`${this.host}/user/resetPassword/${email}`);
@@ -70,7 +71,7 @@ export class UserService {
     formData.append('currentUsername', loggedInUsername);
     formData.append('firstName', user.firstName);
     formData.append('lastName', user.lastName);
-    formData.append('userName', user.userName);  
+    formData.append('userName', user.username);  
     formData.append('email', user.email);
     formData.append('role', user.role);
     formData.append('profileImage', profileImage);

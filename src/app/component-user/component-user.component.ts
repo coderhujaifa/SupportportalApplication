@@ -8,6 +8,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { NgForm } from '@angular/forms';
 import { CustomHttpResponse } from '../model/custom-http-response';
 import { AuthenticationService } from '../service/authentication.service';
+import { Route, Router } from '@angular/router';
 
 @Component({
   selector: 'app-user',
@@ -26,15 +27,13 @@ export class ComponentUserComponent implements OnInit {
   private subscriptions: Subscription[] = [];
   public editUser = new User();
   private currentUsername: any;
-  constructor(
-  private authenticationService: AuthenticationService,
-  private userService: UserService,
-  private notificationService: NotificationService
-) { }
+  constructor(private router: Router,
+    private authenticationService: AuthenticationService,
+    private userService: UserService,
+    private notificationService: NotificationService) { }
 
-  
-    ngOnInit(): void { 
-    this.user = this.authenticationService.getUserFromLocalCache()|| new User;
+  ngOnInit(): void {
+    this.user = this.authenticationService.getUserFromLocalCache() || new User;
     this.getUsers(true);
   }
 
@@ -61,83 +60,9 @@ export class ComponentUserComponent implements OnInit {
     );
   }
 
-  public onLogOut(): void {
-  this.authenticationService.logOut();
-  // Optional: redirect to login
-  window.location.href = '/login';
-}
-
-public onUpdateCurrentUser(user: User): void {
-  this.refreshing = true;
-  const currentUser = this.authenticationService.getUserFromLocalCache();
-  this.currentUsername = currentUser ? currentUser.userName : null;
-
-  const formData = this.userService.createUserFormData(
-    this.currentUsername,
-    this.editUser,
-    this.profileImage!
-  );
-
-  this.subscriptions.push(
-    this.userService.updateUser(formData).subscribe(
-      (response) => {  // Type hata diya
-        this.authenticationService.addUserToLocalCache(response as User);
-        this.getUsers(false);
-        this.fileName = undefined;
-        this.profileImage = undefined;
-        this.sendNotification(
-          NotificationType.SUCCESS,
-          `${(response as User).firstName} ${(response as User).lastName} update successful`
-        );
-      },
-      (errorResponse: HttpErrorResponse) => {
-        this.sendNotification(
-          NotificationType.ERROR,
-          errorResponse.error.message
-        );
-        this.refreshing = false;
-        this.profileImage = undefined;
-      }
-    )
-  );
-}
-
-  public onResetPassword(emailForm: NgForm): void {
-    const emailAddress = emailForm.value['reset-password-email'];
-    this.refreshing = true;
-
-    this.subscriptions.push(
-      this.userService.resetPassword(emailAddress).subscribe(
-        (response: CustomHttpResponse) => {
-          this.sendNotification(NotificationType.SUCCESS, response.message);
-          this.refreshing = false;
-          emailForm.reset();
-        },
-        (error: HttpErrorResponse) => {
-          this.sendNotification(NotificationType.WARNING, error.error.message);
-          this.refreshing = false;
-        }
-      )
-    );
-  }
-
-  public onDeleteUser(userId: number): void {
-    this.subscriptions.push(
-      this.userService.deleteUser(userId).subscribe(
-        (response: CustomHttpResponse) => {
-          this.sendNotification(NotificationType.SUCCESS, response.message);
-          this.getUsers(false);
-        },
-        (error: HttpErrorResponse) => {
-          this.sendNotification(NotificationType.ERROR, error.error.message);
-        }
-      )
-    );
-  }
-
   public onSelectUser(selectedUser: User): void {
     this.selectedUser = selectedUser;
-    this.clickButton('openUserInfo');  // Sahi button call
+    this.clickButton('openUserInfo');
   }
 
 
@@ -161,7 +86,6 @@ public onUpdateCurrentUser(user: User): void {
     }
 
     const formData = this.userService.createUserFormData('', userForm.value, this.profileImage);
-
     this.subscriptions.push(
       this.userService.addUser(formData).subscribe(
         (response) => {
@@ -180,23 +104,6 @@ public onUpdateCurrentUser(user: User): void {
       )
     );
   }
-
-  public searchUsers(searchTerm: string): void {
-    const results: User[] = [];
-    for (const user of this.userService.getUsersFormLocalCache()) {
-      if (user.firstName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||
-        user.lastName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||
-        user.userName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||
-        user.userId.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1) {
-        results.push(user);
-      }
-    }
-    this.users = results;
-    if (results.length == 0 || !searchTerm) {
-      this.users = this.userService.getUsersFormLocalCache();
-    }
-  }
-
 
   public onUpdateUser(): void {
     const formData = this.userService.createUserFormData(this.currentUsername, this.editUser, this.profileImage!);
@@ -217,10 +124,88 @@ public onUpdateCurrentUser(user: User): void {
     );
   }
 
+  public onResetPassword(emailForm: NgForm): void {
+    const emailAddress = emailForm.value['reset-password-email'];
+    this.refreshing = true;
+
+    this.subscriptions.push(
+      this.userService.resetPassword(emailAddress).subscribe(
+        (response: CustomHttpResponse) => {
+          this.sendNotification(NotificationType.SUCCESS, response.message);
+          this.refreshing = false;
+          emailForm.reset();
+        },
+        (error: HttpErrorResponse) => {
+          this.sendNotification(NotificationType.WARNING, error.error.message);
+          this.refreshing = false;
+        }
+      )
+    );
+  }
+
+  public onLogOut(): void {
+    this.authenticationService.logOut();
+    this.router.navigate(['/login']);
+    this.sendNotification(NotificationType.SUCCESS,'You been successfully logged out')
+  }
+
+  public onUpdateCurrentUser(user: User): void {
+    this.refreshing = true;
+    this.currentUsername = this.authenticationService.getUserFromLocalCache()?.username || '';
+    const formData = this.userService.createUserFormData(this.currentUsername,user,this.profileImage ?? new File([], ""));
+    this.subscriptions.push(
+      this.userService.updateUser(formData).subscribe(
+        (response: User) => {
+          this.authenticationService.addUserToLocalCache(response);
+          this.getUsers(false);
+          this.fileName = undefined;
+          this.profileImage = undefined;
+          this.sendNotification(NotificationType.SUCCESS,`${response.firstName} ${response.lastName} update successful`);
+        },
+        (errorResponse: HttpErrorResponse) => {
+          this.sendNotification(NotificationType.ERROR,errorResponse.error.message);
+          this.refreshing = true;
+          this.profileImage = undefined;
+        }
+      )
+    );
+  }
+
+  
   public onEditUser(editUser: User): void {
     this.editUser = editUser;
-    this.currentUsername = editUser.userName;
+    this.currentUsername = editUser.username;
     this.clickButton('openUserEdit');
+  }
+
+  public searchUsers(searchTerm: string): void {
+    const results: User[] = [];
+    for (const user of this.userService.getUsersFormLocalCache()) {
+      if (user.firstName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||
+        user.lastName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||
+        user.username.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||
+        user.userId.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1) {
+        results.push(user);
+      }
+    }
+    this.users = results;
+    if (results.length == 0 || !searchTerm) {
+      this.users = this.userService.getUsersFormLocalCache();
+    }
+  }
+
+  public onDeleteUser(userId: number): void {
+    this.subscriptions.push(
+      this.userService.deleteUser(userId).subscribe(
+        (response: CustomHttpResponse) => {
+          this.sendNotification(NotificationType.SUCCESS, response.message);
+          this.getUsers(false);
+        },
+        (error: HttpErrorResponse) => {
+          this.sendNotification(NotificationType.ERROR, error.error.message);
+        }
+      )
+    );
   }
 
   private sendNotification(notificationType: NotificationType, message: string): void {
@@ -244,10 +229,7 @@ public onUpdateCurrentUser(user: User): void {
     }
   }
 
-
-  // ✅ Add this function to fix the error
   public clickButton(buttonId: string): void {
     document.getElementById(buttonId)?.click();
   }
 }
-

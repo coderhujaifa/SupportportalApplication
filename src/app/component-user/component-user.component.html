@@ -18,7 +18,7 @@
           <i class="fa fa-cogs"></i> Settings
         </a>
         <a class="nav-item nav-link move-right mr-3" id="profile-tab" data-toggle="tab" href="#profile" role="tab">
-          Welcome, Huzaifa <i class="fa fa-user"></i>
+          Welcome{{user?.firstName}}<i class="fa fa-user"></i>
         </a>
       </div>
     </div>
@@ -72,7 +72,7 @@
             <td (click)="onSelectUser(appUser)">{{ appUser?.userId }}</td>
             <td (click)="onSelectUser(appUser)">{{ appUser?.firstName }}</td>
             <td (click)="onSelectUser(appUser)">{{ appUser?.lastName }}</td>
-            <td (click)="onSelectUser(appUser)">{{ appUser?.userName }}</td>
+            <td (click)="onSelectUser(appUser)">{{ appUser?.username }}</td>
             <td (click)="onSelectUser(appUser)">{{ appUser?.email }}</td>
             <td (click)="onSelectUser(appUser)">
               <span [hidden]="!appUser?.active" class="badge badge-success">Active</span>
@@ -518,4 +518,11 @@
       </div>
     </div>
   </div>
+
+  <!-- profile Image change form -->
+   <!-- <form enctype="multipart/form-data" style="display: none;">
+    <input type="file"
+    (change)="onProfileImageChange($event.target.files[0].name,$event.target.files[0]); onProfileImageChange()"
+    name="profile-image-input" id="profile-image-input" placeholder="file" ngModel accept="*" />
+   </form> -->
 </div>
