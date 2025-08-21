@@ -31,17 +31,16 @@ export class ComponentLoginComponent implements OnInit, OnDestroy {
     this.showLoading = true;
     this.subscriptions.push(
       this.authenticationService.login(user).subscribe({
+
         next: (response: HttpResponse<User>) => {
           const token = response.headers.get('HeaderType.JWT_TOKEN');
           if (token) {
             this.authenticationService.saveToken(token);
           }
-
           const user = response.body;
           if (user) {
             this.authenticationService.addUserToLocalCache(user);
           }
-
           this.router.navigateByUrl('/user/management');
           this.showLoading = false;
         },

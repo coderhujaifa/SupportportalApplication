@@ -114,7 +114,7 @@ export class ComponentUserComponent implements OnInit {
           this.getUsers(false);
           this.fileName = undefined;
           this.profileImage = undefined;
-          this.sendNotification(NotificationType.SUCCESS, '${response.firstName} ${response.lastName} updated successfully');
+          this.sendNotification(NotificationType.SUCCESS, `${response.firstName} ${response.lastName} updated successfully`);
         },
         (error: HttpErrorResponse) => {
           this.sendNotification(NotificationType.ERROR, error.error.message);
@@ -151,20 +151,20 @@ export class ComponentUserComponent implements OnInit {
 
   public onUpdateCurrentUser(user: User): void {
     this.refreshing = true;
-    this.currentUsername = this.authenticationService.getUserFromLocalCache()?.username || '';
-    const formData = this.userService.createUserFormData(this.currentUsername,user,this.profileImage ?? new File([], ""));
+    this.currentUsername = this.authenticationService.getUserFromLocalCache()?.username;
+    const formData = this.userService.createUserFormData(this.currentUsername, user, this.profileImage!);
     this.subscriptions.push(
       this.userService.updateUser(formData).subscribe(
-        (response: User) => {
+        (response) => {
           this.authenticationService.addUserToLocalCache(response);
           this.getUsers(false);
           this.fileName = undefined;
           this.profileImage = undefined;
-          this.sendNotification(NotificationType.SUCCESS,`${response.firstName} ${response.lastName} update successful`);
+          this.sendNotification(NotificationType.SUCCESS, `${response.firstName} ${response.lastName} updated successfully`);
         },
-        (errorResponse: HttpErrorResponse) => {
-          this.sendNotification(NotificationType.ERROR,errorResponse.error.message);
-          this.refreshing = true;
+        (error: HttpErrorResponse) => {
+          this.sendNotification(NotificationType.ERROR, error.error.message);
+           this.refreshing = true;
           this.profileImage = undefined;
         }
       )

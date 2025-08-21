@@ -10,27 +10,24 @@
   <!-- nav bar -->
   <nav class="navbar navbar-expand-md breadcrumb">
     <div class="collapse navbar-collapse" id="navbarCollapse">
-      <div class="nav nav-pills" role="tablist">
-        <a class="nav-item nav-link active ml-1" id="users-tab" data-toggle="tab" href="#users" role="tab">
+      <div class="nav nav-pills">
+        <a class="nav-item nav-link active ml-1" (click)="changeTitle('Users')" data-toggle="tab" href="#users">
           <i class="fa fa-users"></i> Users
         </a>
-        <a class="nav-item nav-link ml-3" id="settings-tab" data-toggle="tab" href="#reset-password" role="tab">
+        <a class="nav-item nav-link ml-3" (click)="changeTitle('Settings')" data-toggle="tab" href="#reset-password">
           <i class="fa fa-cogs"></i> Settings
         </a>
-        <a class="nav-item nav-link move-right mr-3" id="profile-tab" data-toggle="tab" href="#profile" role="tab">
-          Welcome{{user?.firstName}}<i class="fa fa-user"></i>
+        <a class="nav-item nav-link move-right mr-3" (click)="changeTitle('Profile')" data-toggle="tab" href="#profile">
+          Welcome, {{user?.firstName}}<i class="fa fa-user"></i>
         </a>
       </div>
     </div>
   </nav>
 
   <!-- tab content -->
-  <div class="tab-content mt-3">
-    <!-- Users tab -->
-    <div class="tab-pane fade show active" id="users" role="tabpanel">
-      <h3>Users List</h3>
-
+  <div class="tab-content mt-3" id="myTabContact">
       <!-- Users table & search -->
+      <div class="tab-pane fade show active" id="users">
       <div class="mb-3 float-right">
         <div class="btn-group mr-2">
           <form class="form-inline my-2 my-lg-0 justify-content-center">
@@ -63,7 +60,7 @@
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody >
           <tr *ngFor="let appUser of users" class="text-center">
             <td (click)="onSelectUser(appUser)">
               <img height="40" width="40" [src]="appUser?.profileImageUrl"
@@ -92,7 +89,6 @@
         </tbody>
       </table>
     </div>
-
     <!-- Reset password tab -->
     <div class="tab-pane fade" id="reset-password" role="tabpanel">
       <form #resetPasswordForm="ngForm" (ngSubmit)="onResetPassword(resetPasswordForm)">
