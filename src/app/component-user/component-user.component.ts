@@ -4,7 +4,7 @@ import { User } from '../model/user';
 import { UserService } from '../service/user.service';
 import { NotificationService } from '../service/notification.service';
 import { NotificationType } from '../enum/notification-type.enum';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpEvent, HttpEventType } from '@angular/common/http';
 import { NgForm } from '@angular/forms';
 import { CustomHttpResponse } from '../model/custom-http-response';
 import { AuthenticationService } from '../service/authentication.service';
@@ -16,6 +16,7 @@ import { Route, Router } from '@angular/router';
   styleUrls: ['./component-user.component.css']
 })
 export class ComponentUserComponent implements OnInit {
+  fileStatus: { status: string; percentage: number } = { status: '', percentage: 0 };
   private titleSubject = new BehaviorSubject<string>('Users');
   public titleAction$ = this.titleSubject.asObservable();
   public users: User[] = [];
@@ -33,18 +34,27 @@ export class ComponentUserComponent implements OnInit {
     private notificationService: NotificationService) { }
 
   ngOnInit(): void {
-    this.user = this.authenticationService.getUserFromLocalCache() || new User;
+    this.user = this.authenticationService.getUserFromLocalCache() || new User();
+    if (this.user.lastLoginDateDisplay) {
+      this.user.lastLoginDateDisplay = new Date(this.user.lastLoginDateDisplay);
+    }
     this.getUsers(true);
   }
 
   public changeTitle(title: string): void {
     this.titleSubject.next(title);
   }
+
   public getUsers(showNotification: boolean): void {
     this.refreshing = true;
     this.subscriptions.push(
       this.userService.getUsers().subscribe({
         next: (response: User[]) => {
+          response.forEach(u => {
+            if (u.logInDateDisplay) {
+              u.logInDateDisplay = new Date(u.logInDateDisplay);
+            }
+          });
           this.userService.addUsersToLocalCache(response);
           this.users = response;
           this.refreshing = false;
@@ -63,16 +73,6 @@ export class ComponentUserComponent implements OnInit {
   public onSelectUser(selectedUser: User): void {
     this.selectedUser = selectedUser;
     this.clickButton('openUserInfo');
-  }
-
-
-  public onProfileImageChange(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input?.files && input.files.length > 0) {
-      const file = input.files[0];
-      this.fileName = file.name;
-      this.profileImage = file;
-    }
   }
 
   public saveNewUser(): void {
@@ -105,6 +105,14 @@ export class ComponentUserComponent implements OnInit {
     );
   }
 
+  public onProfileImageChange(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.profileImage = file;
+      this.fileName = file.name;
+    }
+  }
+
   public onUpdateUser(): void {
     const formData = this.userService.createUserFormData(this.currentUsername, this.editUser, this.profileImage!);
     this.subscriptions.push(
@@ -127,7 +135,6 @@ export class ComponentUserComponent implements OnInit {
   public onResetPassword(emailForm: NgForm): void {
     const emailAddress = emailForm.value['reset-password-email'];
     this.refreshing = true;
-
     this.subscriptions.push(
       this.userService.resetPassword(emailAddress).subscribe(
         (response: CustomHttpResponse) => {
@@ -142,11 +149,61 @@ export class ComponentUserComponent implements OnInit {
       )
     );
   }
+  public triggerImageInput(): void {
+    const fileInput = document.getElementById('profile-image-input') as HTMLInputElement;
+    fileInput.click();
+  }
+
+  public updateProfileImage(): void {
+    this.clickButton('profile-image-input');
+  }
+
+  public onUpdateProfileImage(): void {
+    const formData = new FormData();
+    formData.append('username', this.user.username);
+    formData.append('profileImage', this.profileImage!);
+    this.subscriptions.push(
+      this.userService.updateProfileImage(formData).subscribe(
+        (event: HttpEvent<any>) => {
+          this.reportProfileImage(event);
+        },
+        (errorResponse: HttpErrorResponse) => {
+          this.sendNotification(NotificationType.ERROR, errorResponse.error.message);
+          this.fileStatus.status = 'done';
+        }
+      )
+    );
+  }
+
+  private reportProfileImage(event: HttpEvent<any>): void {
+    switch (event.type) {
+      case HttpEventType.UploadProgress:
+        if (event.total) {
+          this.fileStatus.percentage = Math.round(100 * event.loaded / event.total);
+        }
+        this.fileStatus.status = 'progress';
+        break;
+
+      case HttpEventType.Response:
+        if (event.status === 200) {
+          this.user.profileImageUrl = `${event.body.profileImageUrl}?time=${new Date().getTime()}`;
+          this.sendNotification(NotificationType.SUCCESS, `${event.body.fileName}'s Profile image updated successfully`);
+          this.fileStatus.status = 'done';
+        } else {
+          this.sendNotification(NotificationType.ERROR, 'Unable to upload image. Please try again');
+        }
+        break;
+
+      default:
+        console.log('Finished all processes');
+    }
+  }
+
 
   public onLogOut(): void {
     this.authenticationService.logOut();
     this.router.navigate(['/login']);
-    this.sendNotification(NotificationType.SUCCESS,'You been successfully logged out')
+    this.sendNotification(NotificationType.SUCCESS, 'You been successfully logged out')
   }
 
   public onUpdateCurrentUser(user: User): void {
@@ -155,27 +212,31 @@ export class ComponentUserComponent implements OnInit {
     const formData = this.userService.createUserFormData(this.currentUsername, user, this.profileImage!);
     this.subscriptions.push(
       this.userService.updateUser(formData).subscribe(
-        (response) => {
+        (response: User) => {
+          if (response.logInDateDisplay) {
+            response.logInDateDisplay = new Date(response.logInDateDisplay);
+          }
           this.authenticationService.addUserToLocalCache(response);
           this.getUsers(false);
           this.fileName = undefined;
           this.profileImage = undefined;
           this.sendNotification(NotificationType.SUCCESS, `${response.firstName} ${response.lastName} updated successfully`);
         },
-        (error: HttpErrorResponse) => {
-          this.sendNotification(NotificationType.ERROR, error.error.message);
-           this.refreshing = true;
+        (errorResponse: HttpErrorResponse) => {
+          this.sendNotification(NotificationType.ERROR, errorResponse.error.message);
+          this.refreshing = true;
           this.profileImage = undefined;
         }
       )
     );
   }
 
-  
+
   public onEditUser(editUser: User): void {
     this.editUser = editUser;
     this.currentUsername = editUser.username;
     this.clickButton('openUserEdit');
+
   }
 
   public searchUsers(searchTerm: string): void {
@@ -194,9 +255,9 @@ export class ComponentUserComponent implements OnInit {
     }
   }
 
-  public onDeleteUser(userId: number): void {
+  public onDeleteUser(username: string): void {
     this.subscriptions.push(
-      this.userService.deleteUser(userId).subscribe(
+      this.userService.deleteUser(username).subscribe(
         (response: CustomHttpResponse) => {
           this.sendNotification(NotificationType.SUCCESS, response.message);
           this.getUsers(false);

@@ -6,12 +6,13 @@ export class User {
   public username: string = '';
   public email: string = '';
   public logInDateDisplay: Date = new Date();
+  public lastLoginDateDisplay: Date | null = null; 
   public joinDate: Date = new Date();
   public profileImageUrl: string = '';
   public active: boolean = false;
   public notLocked: boolean = false;
   public role: string = '';
-  public authorities: [] = [];
+  public authorities: string[] = [];  
 
   constructor() {
     this.firstName = '';

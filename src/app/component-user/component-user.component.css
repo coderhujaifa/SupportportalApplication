@@ -34,3 +34,18 @@
 .profile-details a:hover {
   text-decoration: underline;
 }
+
+
+.navbar.breadcrumb {
+  background-color: rgb(208, 204, 204);;  
+  padding: 10px 20px;        
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.navbar .nav-link {
+  font-weight: 500;
+  margin-right: 15px;
+}
+
+
+

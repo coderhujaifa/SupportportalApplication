@@ -19,15 +19,16 @@ export class UserService {
 
   // Get users and map 'username' (from backend) to 'userName' (in model)
   public getUsers(): Observable<User[]> {
-    return this.http.get<User[]>(`${this.host}/user/list`).pipe(
-      map(users => users.map(user => {
-        return {
-          ...user,
-          username: (user as any).username  // map backend 'username' to model 'userName'
-        } as User;
-      }))
-    );
-  }
+  return this.http.get<User[]>(`${this.host}/user/list`).pipe(
+    map(users => users.map(user => {
+      return {
+        ...user,
+        lastLoginDateDisplay: user.lastLoginDateDisplay ? new Date(user.lastLoginDateDisplay) : null
+      } as User;
+    }))
+  );
+}
+
 
   public addUser(formData: FormData): Observable<User | HttpErrorResponse> {
     return this.http.post<User>(`${this.host}/user/add`, formData);
@@ -44,15 +45,16 @@ public updateUser(formData: FormData): Observable<User> {
 
 
 
-  public updateProfileImage(formData: FormData): Observable<HttpEvent<User> | HttpErrorResponse> {
-    return this.http.post<User>(`${this.host}/user/updateProfileImage`, formData, {
-      reportProgress: true,
-      observe: 'events'
-    });
-  }
+  public updateProfileImage(formData: FormData): Observable<HttpEvent<User>> {
+  return this.http.post<User>(`${this.host}/user/updateProfileImage`, formData, {
+    reportProgress: true,
+    observe: 'events'
+  });
+}
 
-  public deleteUser(userId: number): Observable<CustomHttpResponse> {
-  return this.http.delete<CustomHttpResponse>(`${this.host}/user/delete/${userId}`);
+
+  public deleteUser(username: string): Observable<CustomHttpResponse> {
+  return this.http.delete<CustomHttpResponse>(`${this.host}/user/delete/${username}`);
 }
 
 
