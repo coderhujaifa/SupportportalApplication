@@ -5,8 +5,7 @@ export class User {
   public lastName: string = '';
   public username: string = '';
   public email: string = '';
-  public logInDateDisplay: Date = new Date();
-  public lastLoginDateDisplay: Date | null = null; 
+  public lastLoginDateDisplay: Date | null = null;  
   public joinDate: Date = new Date();
   public profileImageUrl: string = '';
   public active: boolean = false;

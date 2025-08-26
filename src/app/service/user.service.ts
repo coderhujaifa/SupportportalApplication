@@ -67,7 +67,6 @@ public updateUser(formData: FormData): Observable<User> {
     return usersJson ? JSON.parse(usersJson) as User[] : [];
   }
 
-  // Create form data for user (note: userName property used here)
   public createUserFormData(loggedInUsername: string, user: User, profileImage: File): FormData {
     const formData = new FormData();
     formData.append('currentUsername', loggedInUsername);

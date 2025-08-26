@@ -48,4 +48,15 @@
 }
 
 
+.modal .card {
+  border-radius: 10px;
+}
+
+.modal .card-body {
+  padding: 1rem;
+}
+
+.modal img {
+  border: 2px solid #ddd;
+}
 

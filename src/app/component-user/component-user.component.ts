@@ -35,10 +35,10 @@ export class ComponentUserComponent implements OnInit {
 
   ngOnInit(): void {
     this.user = this.authenticationService.getUserFromLocalCache() || new User();
-    if (this.user.lastLoginDateDisplay) {
-      this.user.lastLoginDateDisplay = new Date(this.user.lastLoginDateDisplay);
-    }
-    this.getUsers(true);
+  if (this.user.lastLoginDateDisplay) {
+    this.user.lastLoginDateDisplay = new Date(this.user.lastLoginDateDisplay);
+  }
+  this.getUsers(true);
   }
 
   public changeTitle(title: string): void {
@@ -46,29 +46,29 @@ export class ComponentUserComponent implements OnInit {
   }
 
   public getUsers(showNotification: boolean): void {
-    this.refreshing = true;
-    this.subscriptions.push(
-      this.userService.getUsers().subscribe({
-        next: (response: User[]) => {
-          response.forEach(u => {
-            if (u.logInDateDisplay) {
-              u.logInDateDisplay = new Date(u.logInDateDisplay);
-            }
-          });
-          this.userService.addUsersToLocalCache(response);
-          this.users = response;
-          this.refreshing = false;
-          if (showNotification) {
-            this.sendNotification(NotificationType.SUCCESS, `${response.length} user(s) loaded successfully.`);
+  this.refreshing = true;
+  this.subscriptions.push(
+    this.userService.getUsers().subscribe({
+      next: (response: User[]) => {
+        response.forEach(u => {
+          if (u.lastLoginDateDisplay) {
+            u.lastLoginDateDisplay = new Date(u.lastLoginDateDisplay);
           }
-        },
-        error: (errorResponse: HttpErrorResponse) => {
-          this.sendNotification(NotificationType.ERROR, errorResponse.error.message);
-          this.refreshing = false;
+        });
+        this.userService.addUsersToLocalCache(response);
+        this.users = response;
+        this.refreshing = false;
+        if (showNotification) {
+          this.sendNotification(NotificationType.SUCCESS, `${response.length} user(s) loaded successfully.`);
         }
-      })
-    );
-  }
+      },
+      error: (errorResponse: HttpErrorResponse) => {
+        this.sendNotification(NotificationType.ERROR, errorResponse.error.message);
+        this.refreshing = false;
+      }
+    })
+  );
+}
 
   public onSelectUser(selectedUser: User): void {
     this.selectedUser = selectedUser;
@@ -207,31 +207,29 @@ export class ComponentUserComponent implements OnInit {
   }
 
   public onUpdateCurrentUser(user: User): void {
-    this.refreshing = true;
-    this.currentUsername = this.authenticationService.getUserFromLocalCache()?.username;
-    const formData = this.userService.createUserFormData(this.currentUsername, user, this.profileImage!);
-    this.subscriptions.push(
-      this.userService.updateUser(formData).subscribe(
-        (response: User) => {
-          if (response.logInDateDisplay) {
-            response.logInDateDisplay = new Date(response.logInDateDisplay);
-          }
-          this.authenticationService.addUserToLocalCache(response);
-          this.getUsers(false);
-          this.fileName = undefined;
-          this.profileImage = undefined;
-          this.sendNotification(NotificationType.SUCCESS, `${response.firstName} ${response.lastName} updated successfully`);
-        },
-        (errorResponse: HttpErrorResponse) => {
-          this.sendNotification(NotificationType.ERROR, errorResponse.error.message);
-          this.refreshing = true;
-          this.profileImage = undefined;
+  this.refreshing = true;
+  this.currentUsername = this.authenticationService.getUserFromLocalCache()?.username;
+  const formData = this.userService.createUserFormData(this.currentUsername, user, this.profileImage!);
+  this.subscriptions.push(
+    this.userService.updateUser(formData).subscribe(
+      (response: User) => {
+        if (response.lastLoginDateDisplay) {
+          response.lastLoginDateDisplay = new Date(response.lastLoginDateDisplay);
         }
-      )
-    );
-  }
-
-
+        this.authenticationService.addUserToLocalCache(response);
+        this.getUsers(false);
+        this.fileName = undefined;
+        this.profileImage = undefined;
+        this.sendNotification(NotificationType.SUCCESS, `${response.firstName} ${response.lastName} updated successfully`);
+      },
+      (errorResponse: HttpErrorResponse) => {
+        this.sendNotification(NotificationType.ERROR, errorResponse.error.message);
+        this.refreshing = true;
+        this.profileImage = undefined;
+      }
+    )
+  );
+}
   public onEditUser(editUser: User): void {
     this.editUser = editUser;
     this.currentUsername = editUser.username;
