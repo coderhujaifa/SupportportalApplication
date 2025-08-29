@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { User } from '../model/user';
 import { UserService } from '../service/user.service';
@@ -9,14 +9,17 @@ import { NgForm } from '@angular/forms';
 import { CustomHttpResponse } from '../model/custom-http-response';
 import { AuthenticationService } from '../service/authentication.service';
 import { Route, Router } from '@angular/router';
+import { Role } from '../enum/role.enum';
+import { SubSink } from 'subsink';
 
 @Component({
   selector: 'app-user',
   templateUrl: './component-user.component.html',
   styleUrls: ['./component-user.component.css']
 })
-export class ComponentUserComponent implements OnInit {
+export class ComponentUserComponent implements OnInit, OnDestroy {
   fileStatus: { status: string; percentage: number } = { status: '', percentage: 0 };
+  private subs = new SubSink();
   private titleSubject = new BehaviorSubject<string>('Users');
   public titleAction$ = this.titleSubject.asObservable();
   public users: User[] = [];
@@ -47,7 +50,7 @@ export class ComponentUserComponent implements OnInit {
 
   public getUsers(showNotification: boolean): void {
   this.refreshing = true;
-  this.subscriptions.push(
+  this.subs.add(
     this.userService.getUsers().subscribe({
       next: (response: User[]) => {
         response.forEach(u => {
@@ -86,7 +89,7 @@ export class ComponentUserComponent implements OnInit {
     }
 
     const formData = this.userService.createUserFormData('', userForm.value, this.profileImage);
-    this.subscriptions.push(
+    this.subs.add(
       this.userService.addUser(formData).subscribe(
         (response) => {
           this.clickButton('new-user-close');
@@ -267,6 +270,23 @@ export class ComponentUserComponent implements OnInit {
     );
   }
 
+  public get isAdmin(): boolean {
+  return this.getUserRole() === Role.ADMIN || this.getUserRole() === Role.SUPER_ADMIN;
+}
+
+public get isManager(): boolean {
+  return this.isAdmin || this.getUserRole() === Role.MANAGER;
+}
+
+public get isAdminOrManager(): boolean {
+  return this.isAdmin || this.isManager;
+}
+
+private getUserRole(): string {
+  return this.authenticationService.getUserFromLocalCache()?.role || '';
+}
+
+
   private sendNotification(notificationType: NotificationType, message: string): void {
     if (message) {
       this.notificationService.notify(notificationType, message);
@@ -290,5 +310,9 @@ export class ComponentUserComponent implements OnInit {
 
   public clickButton(buttonId: string): void {
     document.getElementById(buttonId)?.click();
+  }
+
+    ngOnDestroy(): void {
+    this.subs.unsubscribe();
   }
 }

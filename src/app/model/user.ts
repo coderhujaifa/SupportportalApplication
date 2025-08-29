@@ -1,5 +1,4 @@
 export class User {
-  public id: number = 0;
   public userId: string = '';
   public firstName: string = '';
   public lastName: string = '';
